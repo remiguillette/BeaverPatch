@@ -188,36 +188,33 @@ const AccidentReportPanel: React.FC = () => {
   
   const submitMutation = useMutation({
     mutationFn: async (data: AccidentReportFormData) => {
-      // Convert form data to the expected API format
+      // Extrayons les données dont le backend a besoin selon le schéma
+      // Nous nous concentrons uniquement sur les champs requis par le backend
       const formattedData = {
-        ...data,
         dateTime: new Date(data.dateTime),
-        // Format vehicle 1 data
+        location: data.location,
+        description: data.description,
+        weatherConditions: data.weatherConditions,
+        roadConditions: data.roadConditions,
+        
+        // Format vehicle 1 data - nous conservons uniquement les champs correspondant au schéma
         vehicle1: {
-          ...data.vehicle1,
+          licensePlate: data.vehicle1.licensePlate,
+          makeModel: data.vehicle1.makeModel,
           year: parseInt(data.vehicle1.year),
-          // If owner is same as driver, populate owner name from driver info
-          ownerName: data.vehicle1.ownerSameAsDriver ? data.driver1.name : data.vehicle1.ownerName
+          color: data.vehicle1.color
         },
         
-        // Format vehicle 2 data if it exists
+        // Format vehicle 2 data if it exists - là aussi, uniquement les champs du schéma
         vehicle2: data.vehicle2 && data.vehicle2.licensePlate ? {
-          ...data.vehicle2,
+          licensePlate: data.vehicle2.licensePlate,
+          makeModel: data.vehicle2.makeModel,
           year: data.vehicle2.year ? parseInt(data.vehicle2.year) : undefined,
-          // If owner is same as driver, populate owner name from driver info
-          ownerName: data.vehicle2.ownerSameAsDriver && data.driver2 ? data.driver2.name : data.vehicle2.ownerName
-        } : undefined,
-        
-        // Only include driver2 if it has information
-        driver2: data.driver2 && data.driver2.name ? data.driver2 : undefined,
-        
-        // Add report type based on the accident type
-        reportType: data.accidentType,
-        
-        // Additional metadata
-        reportSubmittedOn: new Date(),
-        totalEstimatedDamage: data.totalDamageEstimate ? parseFloat(data.totalDamageEstimate) : undefined
+          color: data.vehicle2.color
+        } : undefined
       };
+      
+      console.log("Submitting data:", formattedData);
       
       const response = await apiRequest('POST', '/api/accident-reports', formattedData);
       return response.json();
