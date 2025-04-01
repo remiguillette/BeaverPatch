@@ -6,7 +6,8 @@ import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import './leaflet.css';
 import Fuse from 'fuse.js';
-import { AgentPositionContext } from '@/lib/contexts/AgentPositionContext';
+import { useAppContext } from '@/lib/AppContext';
+import { GPSLocation } from '@/lib/types';
 
 // Interface pour les résultats de recherche d'adresse
 interface LocationResult {
@@ -27,10 +28,25 @@ interface NavigationInstruction {
 }
 
 const GPSPanel: React.FC = () => {
-  const { updateAgentPosition } = useContext(AgentPositionContext);
+  // Récupérer le contexte global pour la persistance de la navigation
+  const { 
+    currentDestination, 
+    setCurrentDestination, 
+    isNavigating: globalIsNavigating,
+    setIsNavigating: setGlobalIsNavigating
+  } = useAppContext();
   const [destination, setDestination] = useState('');
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(
+    // Restaurer la destination précédente au chargement du composant
+    currentDestination ? {
+      id: `saved-${currentDestination.latitude}-${currentDestination.longitude}`,
+      name: currentDestination.address || 'Destination sauvegardée',
+      lat: currentDestination.latitude,
+      lng: currentDestination.longitude,
+      address: currentDestination.address
+    } : null
+  );
   const [showResults, setShowResults] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [map, setMap] = useState<L.Map | null>(null);
@@ -39,7 +55,7 @@ const GPSPanel: React.FC = () => {
   const [routeControl, setRouteControl] = useState<L.Routing.Control | null>(null);
   const [navigationInstructions, setNavigationInstructions] = useState<NavigationInstruction[]>([]);
   const [currentInstruction, setCurrentInstruction] = useState<NavigationInstruction | null>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(globalIsNavigating);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
   const [addressDatabase, setAddressDatabase] = useState<LocationResult[]>([]);
@@ -255,9 +271,6 @@ const GPSPanel: React.FC = () => {
   const updateUserLocation = (lat: number, lng: number) => {
     setUserLocation({ lat, lng });
     
-    // Mettre à jour la position dans le contexte global
-    updateAgentPosition({ lat, lng });
-
     // Mettre à jour ou créer le marqueur utilisateur
     if (map) {
       // Nettoyer les marqueurs existants
@@ -439,6 +452,13 @@ const GPSPanel: React.FC = () => {
     setDestination(location.name);
     setShowResults(false);
     
+    // Sauvegarder la destination dans le contexte global pour persistance entre les panneaux
+    setCurrentDestination({
+      latitude: location.lat,
+      longitude: location.lng,
+      address: location.address || location.name
+    });
+    
     if (map) {
       // Centrer la carte entre l'utilisateur et la destination
       if (userLocation) {
@@ -467,7 +487,9 @@ const GPSPanel: React.FC = () => {
       setRouteControl(null);
     }
     
+    // Mettre à jour les états locaux et globaux
     setIsNavigating(false);
+    setGlobalIsNavigating(false);
     setNavigationInstructions([]);
     setCurrentInstruction(null);
   };
@@ -556,7 +578,9 @@ const GPSPanel: React.FC = () => {
 
   // Démarrer la navigation
   const startNavigation = (instructions: NavigationInstruction[]) => {
+    // Mettre à jour l'état local et global de la navigation
     setIsNavigating(true);
+    setGlobalIsNavigating(true);
     
     // Annoncer vocalement la première instruction
     if (instructions.length > 0) {
@@ -566,7 +590,9 @@ const GPSPanel: React.FC = () => {
 
   // Arrêter la navigation
   const stopNavigation = () => {
+    // Mettre à jour l'état local et global de la navigation
     setIsNavigating(false);
+    setGlobalIsNavigating(false);
     
     // Arrêter la synthèse vocale
     window.speechSynthesis.cancel();
@@ -777,11 +803,20 @@ const GPSPanel: React.FC = () => {
       };
     }
     
+    // Restaurer la navigation si elle était active précédemment
+    if (globalIsNavigating && selectedLocation && userLocation) {
+      // Calculer à nouveau l'itinéraire après le chargement complet du composant
+      setTimeout(() => {
+        console.log('Restauration de la navigation précédente...');
+        calculateRoute();
+      }, 1000); // Attendre que la carte soit correctement initialisée
+    }
+    
     // Nettoyer le suivi à la fermeture du composant
     return () => {
       stopPositionTracking();
     };
-  }, []);
+  }, [map, userLocation]);
 
   return (
     <div className="h-full flex flex-col">

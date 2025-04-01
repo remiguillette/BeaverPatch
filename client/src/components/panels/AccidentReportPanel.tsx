@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import i18n from '@/lib/i18n';
 import { AccidentReport } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAppContext } from '@/lib/AppContext';
 
 // Form validation schema
 const accidentReportSchema = z.object({
@@ -107,84 +108,98 @@ type AccidentReportFormData = z.infer<typeof accidentReportSchema>;
 
 const AccidentReportPanel: React.FC = () => {
   const { toast } = useToast();
+  const { accidentFormData, setAccidentFormData } = useAppContext();
   
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<AccidentReportFormData>({
+  // Définir les valeurs par défaut en fonction du contexte global ou utiliser des valeurs vides
+  const defaultValues = accidentFormData || {
+    dateTime: new Date().toISOString().slice(0, 16),
+    location: '',
+    description: '',
+    weatherConditions: '',
+    roadConditions: '',
+    accidentType: '',
+    accidentLocationCode: '',
+    municipality: '',
+    province: 'QC',
+    postedSpeed: '',
+    totalDamageEstimate: '',
+    emergencyEquipment: false,
+    servicePerformed: false,
+    
+    driver1: {
+      name: '',
+      address: '',
+      telephone: '',
+      postalCode: '',
+      licenseNumber: '',
+      dob: '',
+      sex: '',
+      properLicense: true,
+      suspended: false
+    },
+    
+    driver2: {
+      name: '',
+      address: '',
+      telephone: '',
+      postalCode: '',
+      licenseNumber: '',
+      dob: '',
+      sex: '',
+      properLicense: true,
+      suspended: false
+    },
+    
+    vehicle1: {
+      licensePlate: '',
+      makeModel: '',
+      year: '',
+      color: '',
+      bodyType: '',
+      insuranceCompany: '',
+      insurancePolicy: '',
+      ownerName: '',
+      ownerSameAsDriver: true,
+      damageLocation: [],
+      indirectlyInvolved: false,
+      airBrake: false
+    },
+    
+    vehicle2: {
+      licensePlate: '',
+      makeModel: '',
+      year: '',
+      color: '',
+      bodyType: '',
+      insuranceCompany: '',
+      insurancePolicy: '',
+      ownerName: '',
+      ownerSameAsDriver: true,
+      damageLocation: [],
+      indirectlyInvolved: false,
+      airBrake: false
+    },
+    
+    propertyDamage: '',
+    witnesses: '',
+    vehicle1TowedBy: '',
+    vehicle2TowedBy: ''
+  };
+  
+  const { register, handleSubmit, formState: { errors }, reset, watch, getValues } = useForm<AccidentReportFormData>({
     resolver: zodResolver(accidentReportSchema),
-    defaultValues: {
-      dateTime: new Date().toISOString().slice(0, 16),
-      location: '',
-      description: '',
-      weatherConditions: '',
-      roadConditions: '',
-      accidentType: '',
-      accidentLocationCode: '',
-      municipality: '',
-      province: 'QC',
-      postedSpeed: '',
-      totalDamageEstimate: '',
-      emergencyEquipment: false,
-      servicePerformed: false,
-      
-      driver1: {
-        name: '',
-        address: '',
-        telephone: '',
-        postalCode: '',
-        licenseNumber: '',
-        dob: '',
-        sex: '',
-        properLicense: true,
-        suspended: false
-      },
-      
-      driver2: {
-        name: '',
-        address: '',
-        telephone: '',
-        postalCode: '',
-        licenseNumber: '',
-        dob: '',
-        sex: '',
-        properLicense: true,
-        suspended: false
-      },
-      
-      vehicle1: {
-        licensePlate: '',
-        makeModel: '',
-        year: '',
-        color: '',
-        bodyType: '',
-        insuranceCompany: '',
-        insurancePolicy: '',
-        ownerName: '',
-        ownerSameAsDriver: true,
-        damageLocation: [],
-        indirectlyInvolved: false,
-        airBrake: false
-      },
-      
-      vehicle2: {
-        licensePlate: '',
-        makeModel: '',
-        year: '',
-        color: '',
-        bodyType: '',
-        insuranceCompany: '',
-        insurancePolicy: '',
-        ownerName: '',
-        ownerSameAsDriver: true,
-        damageLocation: [],
-        indirectlyInvolved: false,
-        airBrake: false
-      },
-      
-      propertyDamage: '',
-      witnesses: '',
-      vehicle1TowedBy: '',
-      vehicle2TowedBy: ''
-    }
+    defaultValues
   });
+  
+  // Stocker les données du formulaire dans le contexte global chaque fois qu'un champ change
+  useEffect(() => {
+    const subscription = watch((formData) => {
+      // Sauvegarder les données du formulaire dans le contexte global
+      setAccidentFormData(formData as AccidentReportFormData);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [watch, setAccidentFormData]);
   
   const submitMutation = useMutation({
     mutationFn: async (data: AccidentReportFormData) => {
@@ -225,6 +240,8 @@ const AccidentReportPanel: React.FC = () => {
         description: i18n.t('accidentReport.success'),
       });
       reset();
+      // Effacer les données du formulaire dans le contexte global après soumission réussie
+      setAccidentFormData(null);
     },
     onError: (error) => {
       toast({
@@ -242,6 +259,8 @@ const AccidentReportPanel: React.FC = () => {
   
   const handleReset = () => {
     reset();
+    // Effacer également les données dans le contexte global
+    setAccidentFormData(null);
   };
   
   return (

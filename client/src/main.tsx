@@ -1,12 +1,15 @@
 import { createRoot } from "react-dom/client";
+import { QueryClientProvider } from '@tanstack/react-query';
 import App from "./App";
 import "./index.css";
+import { AppProvider } from "./lib/AppContext";
+import { queryClient } from "./lib/queryClient";
 
-// Set global styles for French-language CAD system
+// Configurer les styles globaux pour le système CAD français
 document.documentElement.classList.add("dark");
 document.body.classList.add("bg-deep-black", "text-beaver-orange");
 
-// Create custom CSS variables for the beaver-orange color
+// Créer des variables CSS personnalisées pour les couleurs
 const style = document.createElement("style");
 style.textContent = `
   :root {
@@ -39,4 +42,10 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <AppProvider>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </AppProvider>
+);
