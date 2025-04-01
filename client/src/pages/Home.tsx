@@ -7,6 +7,7 @@ import GPSPanel from '@/components/panels/GPSPanel';
 import AccidentReportPanel from '@/components/panels/AccidentReportPanel';
 import TrafficViolationPanel from '@/components/panels/TrafficViolationPanel';
 import WantedPersonPanel from '@/components/panels/WantedPersonPanel';
+import PrintReportsPanel from '@/components/panels/PrintReportsPanel';
 
 const Home: React.FC = () => {
   const [activePanel, setActivePanel] = useState<PanelType>('gps');
@@ -64,6 +65,16 @@ const Home: React.FC = () => {
         >
           {i18n.t('panels.wantedPersons')}
         </button>
+        <button 
+          className={`px-6 py-2 rounded-lg font-bold transition duration-200 ${
+            activePanel === 'print-reports' 
+              ? 'bg-[#f89422] text-[#121212]' 
+              : 'bg-[#2D2D2D] text-[#f89422]'
+          }`}
+          onClick={() => handlePanelChange('print-reports')}
+        >
+          {i18n.t('panels.printReports')}
+        </button>
       </div>
       
       {/* Main Content */}
@@ -72,6 +83,7 @@ const Home: React.FC = () => {
         {activePanel === 'accident-report' && <AccidentReportPanel />}
         {activePanel === 'violation-report' && <TrafficViolationPanel />}
         {activePanel === 'wanted-persons' && <WantedPersonPanel />}
+        {activePanel === 'print-reports' && <PrintReportsPanel />}
       </main>
       
       <Footer networkStatus={networkStatus} />

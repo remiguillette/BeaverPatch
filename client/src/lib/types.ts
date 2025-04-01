@@ -60,7 +60,7 @@ export interface WantedPerson {
   dangerLevel: string; // 'Dangereux' or 'Surveillance'
 }
 
-export type PanelType = 'gps' | 'accident-report' | 'violation-report' | 'wanted-persons';
+export type PanelType = 'gps' | 'accident-report' | 'violation-report' | 'wanted-persons' | 'print-reports';
 
 export type AppState = {
   connectionStatus: ConnectionStatus;

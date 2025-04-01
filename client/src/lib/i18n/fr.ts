@@ -24,6 +24,7 @@ export const translations = {
     accidentReport: "Rapport d'Accident",
     trafficViolation: "Infraction Routière",
     wantedPersons: "Personnes Recherchées",
+    printReports: "Imprimer les Rapports",
   },
   gps: {
     searchPlaceholder: "Rechercher une destination...",
@@ -165,5 +166,14 @@ export const translations = {
     success: "Succès",
     cm: "cm",
     kg: "kg",
+  },
+  print: {
+    title: "Imprimer les Rapports",
+    selectReport: "Sélectionnez un rapport à imprimer",
+    noReports: "Aucun rapport disponible",
+    view: "Voir",
+    back: "Retour",
+    print: "Imprimer",
+    printButton: "Imprimer",
   },
 };
