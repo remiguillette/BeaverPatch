@@ -171,7 +171,7 @@ const GPSPanel: React.FC = () => {
     if (!navigator.geolocation) {
       alert(i18n.t('gps.noGeolocationSupport'));
       // Utiliser une position par défaut
-      const defaultLocation = { lat: 43.6532, lng: -79.3832 }; // Toronto
+      const defaultLocation = { lat: 43.0716, lng: -79.1010 }; // Région de Niagara Falls par défaut
       updateUserLocation(defaultLocation.lat, defaultLocation.lng);
       return;
     }
@@ -237,8 +237,8 @@ const GPSPanel: React.FC = () => {
 
   // Utiliser une position par défaut en cas d'échec
   const fallbackToDefaultLocation = () => {
-    // Position par défaut (Toronto)
-    const defaultLocation = { lat: 43.6532, lng: -79.3832 };
+    // Position par défaut (Région de Niagara Falls)
+    const defaultLocation = { lat: 43.0716, lng: -79.1010 };
     updateUserLocation(defaultLocation.lat, defaultLocation.lng);
     
     // Centrer la carte sur la position par défaut
@@ -256,16 +256,23 @@ const GPSPanel: React.FC = () => {
       if (userMarker) {
         userMarker.setLatLng([lat, lng]);
       } else {
-        // Créer un marqueur utilisateur personnalisé
+        // Créer un marqueur utilisateur personnalisé avec un icône de voiture
         const userIcon = L.divIcon({
           className: 'custom-user-marker',
-          html: `<div class="h-4 w-4 rounded-full bg-[#f89422] relative"></div>
-                 <div class="h-4 w-4 rounded-full bg-[#f89422] animate-ping absolute opacity-75"></div>`,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
+          html: `<div class="bg-[#f89422] text-black p-1 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.5-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11 2 11.3V16c0 .6.4 1 1 1h1"/>
+                    <circle cx="7" cy="17" r="2"/>
+                    <path d="M9 17h6"/>
+                    <circle cx="17" cy="17" r="2"/>
+                  </svg>
+                </div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 15],
         });
 
         const newUserMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+        newUserMarker.bindPopup(`Votre position: ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
         setUserMarker(newUserMarker);
       }
     }
@@ -737,6 +744,43 @@ const GPSPanel: React.FC = () => {
           ref={mapRef} 
           className="h-full w-full bg-[#1A2530]"
         ></div>
+        
+        {/* Panneau d'information sur la position de l'agent */}
+        {userLocation && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-3 text-white z-[900]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="bg-[#f89422] text-black p-1 rounded-full mr-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.5-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11 2 11.3V16c0 .6.4 1 1 1h1"/>
+                    <circle cx="7" cy="17" r="2"/>
+                    <path d="M9 17h6"/>
+                    <circle cx="17" cy="17" r="2"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm opacity-75">Position de l'agent</div>
+                  <div className="font-bold text-lg">{userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}</div>
+                </div>
+              </div>
+              <button 
+                className="bg-[#f89422] text-black font-bold px-4 py-2 rounded-lg"
+                onClick={() => {
+                  if (userLocation && map) {
+                    map.setView([userLocation.lat, userLocation.lng], 15);
+                    
+                    // Mettre à jour le popup avec les informations actuelles
+                    if (userMarker) {
+                      userMarker.bindPopup(`Position actuelle: ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`).openPopup();
+                    }
+                  }
+                }}
+              >
+                Centrer
+              </button>
+            </div>
+          </div>
+        )}
         
         {/* Instructions de navigation */}
         {isNavigating && currentInstruction && (
