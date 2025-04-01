@@ -260,28 +260,49 @@ const GPSPanel: React.FC = () => {
 
     // Mettre à jour ou créer le marqueur utilisateur
     if (map) {
+      // Supprimer le marqueur existant si présent pour éviter des problèmes de rendu
       if (userMarker) {
-        userMarker.setLatLng([lat, lng]);
-      } else {
-        // Créer un marqueur utilisateur personnalisé avec un icône de voiture plus visible
-        const userIcon = L.divIcon({
-          className: 'custom-user-marker',
-          html: `<div class="bg-[#f89422] text-black p-2 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.5-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11 2 11.3V16c0 .6.4 1 1 1h1"/>
-                    <circle cx="7" cy="17" r="2"/>
-                    <path d="M9 17h6"/>
-                    <circle cx="17" cy="17" r="2"/>
-                  </svg>
-                </div>`,
-          iconSize: [42, 42],
-          iconAnchor: [21, 21],
-        });
-
-        const newUserMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
-        newUserMarker.bindPopup(`Votre position: ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
-        setUserMarker(newUserMarker);
+        map.removeLayer(userMarker);
+        setUserMarker(null);
       }
+      
+      // Création d'un nouvel icône très visible
+      const userIcon = L.divIcon({
+        className: 'custom-user-marker',
+        html: `<div class="relative">
+                <div class="absolute top-0 left-0 right-0 bottom-0 bg-[#ff0000] rounded-full opacity-30 animate-ping"></div>
+                <div class="relative bg-[#f89422] text-white p-4 rounded-full border-4 border-white shadow-xl flex items-center justify-center font-bold text-lg z-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                    <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>`,
+        iconSize: [64, 64],
+        iconAnchor: [32, 64],
+        popupAnchor: [0, -64]
+      });
+
+      // Ajout d'options spécifiques pour s'assurer qu'il reste au-dessus des autres éléments
+      const markerOptions = { 
+        icon: userIcon,
+        zIndexOffset: 1000,  // Valeur élevée pour s'assurer que c'est au-dessus 
+        riseOnHover: true,
+        riseOffset: 1000
+      };
+
+      // Créer un nouveau marqueur
+      const newUserMarker = L.marker([lat, lng], markerOptions).addTo(map);
+      
+      // Ajouter des informations de position au popup
+      newUserMarker.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+      
+      // Stocker la référence du marqueur
+      setUserMarker(newUserMarker);
+      
+      // Force le rendu du marqueur en l'apportant au premier plan
+      newUserMarker.bringToFront();
+      
+      console.log("Nouveau marqueur de position créé à", lat, lng);
     }
   };
 
