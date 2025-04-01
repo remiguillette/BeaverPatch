@@ -1,0 +1,66 @@
+/* Styles spécifiques pour Leaflet et la navigation */
+.leaflet-control-container .leaflet-routing-container-hide {
+  display: none;
+}
+
+/* Personnalisation des marqueurs */
+.custom-user-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Personnalisation du popup */
+.leaflet-popup-content-wrapper {
+  background: #1E1E1E;
+  color: #f89422;
+  border-radius: 8px;
+  border: 1px solid #3D3D3D;
+}
+
+.leaflet-popup-tip {
+  background: #1E1E1E;
+  border: 1px solid #3D3D3D;
+}
+
+/* Style des attributions */
+.leaflet-control-attribution {
+  background-color: rgba(30, 30, 30, 0.8) !important;
+  color: #f89422 !important;
+  font-size: 10px !important;
+  padding: 2px 5px !important;
+  border-radius: 4px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #f89422 !important;
+}
+
+/* Custom controls */
+.leaflet-control {
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.custom-navigation-instruction {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  max-width: 300px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.custom-navigation-instruction-distance {
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+/* Masquer les contrôles Leaflet-routing-machine par défaut */
+.leaflet-routing-container {
+  display: none !important;
+}
