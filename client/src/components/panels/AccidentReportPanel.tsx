@@ -783,16 +783,122 @@ const AccidentReportPanel: React.FC = () => {
               </div>
             </div>
             
+            {/* Driver 2 Information */}
+            <div className="mb-6 pb-6 border-b border-[#2D2D2D]">
+              <h4 className="text-lg font-bold mb-3">Conducteur 2 (D2)</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1">Nom complet</label>
+                  <input 
+                    type="text" 
+                    placeholder="Nom, Prénom" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.name")}
+                  />
+                  {errors.driver2?.name && <p className="text-red-500 text-sm mt-1">{errors.driver2.name.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Numéro de permis de conduire</label>
+                  <input 
+                    type="text" 
+                    placeholder="Numéro du permis" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.licenseNumber")}
+                  />
+                  {errors.driver2?.licenseNumber && <p className="text-red-500 text-sm mt-1">{errors.driver2.licenseNumber.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Adresse</label>
+                  <input 
+                    type="text" 
+                    placeholder="Adresse complète" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.address")}
+                  />
+                  {errors.driver2?.address && <p className="text-red-500 text-sm mt-1">{errors.driver2.address.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Code postal</label>
+                  <input 
+                    type="text" 
+                    placeholder="Code postal" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.postalCode")}
+                  />
+                  {errors.driver2?.postalCode && <p className="text-red-500 text-sm mt-1">{errors.driver2.postalCode.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Téléphone</label>
+                  <input 
+                    type="tel" 
+                    placeholder="Numéro de téléphone" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.telephone")}
+                  />
+                  {errors.driver2?.telephone && <p className="text-red-500 text-sm mt-1">{errors.driver2.telephone.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Date de naissance</label>
+                  <input 
+                    type="date" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.dob")}
+                  />
+                  {errors.driver2?.dob && <p className="text-red-500 text-sm mt-1">{errors.driver2.dob.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Sexe</label>
+                  <select 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.sex")}
+                  >
+                    <option value="">Sélectionnez</option>
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                    <option value="X">X</option>
+                  </select>
+                  {errors.driver2?.sex && <p className="text-red-500 text-sm mt-1">{errors.driver2.sex.message}</p>}
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="driver2ProperLicense"
+                    className="w-5 h-5 rounded bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.properLicense")}
+                  />
+                  <label htmlFor="driver2ProperLicense">Permis approprié pour conduire la catégorie de véhicule</label>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="driver2Suspended"
+                    className="w-5 h-5 rounded bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("driver2.suspended")}
+                  />
+                  <label htmlFor="driver2Suspended">Conducteur avec permis suspendu</label>
+                </div>
+              </div>
+            </div>
+            
             {/* Vehicle 2 */}
             <div>
-              <h4 className="text-lg font-bold mb-3">{i18n.t('accidentReport.vehicleInfo.vehicle2')}</h4>
+              <h4 className="text-lg font-bold mb-3">Véhicule 2 (V2)</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block mb-1">{i18n.t('accidentReport.vehicleInfo.licensePlate')}</label>
                   <input 
                     type="text" 
-                    placeholder={i18n.t('accidentReport.vehicleInfo.licensePlatePlaceholder')} 
+                    placeholder="Plaque d'immatriculation" 
                     className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
                     {...register("vehicle2.licensePlate")}
                   />
@@ -803,7 +909,7 @@ const AccidentReportPanel: React.FC = () => {
                   <label className="block mb-1">{i18n.t('accidentReport.vehicleInfo.makeModel')}</label>
                   <input 
                     type="text" 
-                    placeholder={i18n.t('accidentReport.vehicleInfo.makeModelPlaceholder')} 
+                    placeholder="Marque et modèle" 
                     className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
                     {...register("vehicle2.makeModel")}
                   />
@@ -814,7 +920,7 @@ const AccidentReportPanel: React.FC = () => {
                   <label className="block mb-1">{i18n.t('accidentReport.vehicleInfo.year')}</label>
                   <input 
                     type="number" 
-                    placeholder={i18n.t('accidentReport.vehicleInfo.yearPlaceholder')} 
+                    placeholder="Année" 
                     className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
                     {...register("vehicle2.year")}
                   />
@@ -825,11 +931,195 @@ const AccidentReportPanel: React.FC = () => {
                   <label className="block mb-1">{i18n.t('accidentReport.vehicleInfo.color')}</label>
                   <input 
                     type="text" 
-                    placeholder={i18n.t('accidentReport.vehicleInfo.colorPlaceholder')} 
+                    placeholder="Couleur" 
                     className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
                     {...register("vehicle2.color")}
                   />
                   {errors.vehicle2?.color && <p className="text-red-500 text-sm mt-1">{errors.vehicle2.color.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Type de carrosserie</label>
+                  <select 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2.bodyType")}
+                  >
+                    <option value="">Sélectionnez</option>
+                    <option value="2D">2 portes (2D)</option>
+                    <option value="3D">3 portes (3D)</option>
+                    <option value="4D">4 portes (4D)</option>
+                    <option value="5D">5 portes (5D)</option>
+                    <option value="CV">Décapotable (CV/Conv)</option>
+                    <option value="SW">Familiale (SW)</option>
+                    <option value="MC">Moto (MC)</option>
+                    <option value="Tra">Tracteur (Tra)</option>
+                    <option value="Pnl">Fourgonnette (Pnl)</option>
+                    <option value="Pk">Camionnette (Pk)</option>
+                    <option value="Sk">Plateau (Sk/Stk)</option>
+                    <option value="MH">Autocaravane (MH)</option>
+                    <option value="Dp">Benne basculante (Dp)</option>
+                    <option value="Vn">Fourgonnette (Vn)</option>
+                    <option value="Bu">Autobus (Bu)</option>
+                    <option value="SB">Autobus scolaire (SB)</option>
+                  </select>
+                  {errors.vehicle2?.bodyType && <p className="text-red-500 text-sm mt-1">{errors.vehicle2.bodyType.message}</p>}
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="vehicle2OwnerSameAsDriver"
+                    className="w-5 h-5 rounded bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2.ownerSameAsDriver")}
+                  />
+                  <label htmlFor="vehicle2OwnerSameAsDriver">Propriétaire = Conducteur</label>
+                </div>
+                
+                <div className={`${watch('vehicle2.ownerSameAsDriver') ? 'hidden' : ''}`}>
+                  <label className="block mb-1">Nom du propriétaire</label>
+                  <input 
+                    type="text" 
+                    placeholder="Nom, Prénom" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2.ownerName")}
+                    disabled={watch('vehicle2.ownerSameAsDriver')}
+                  />
+                  {!watch('vehicle2.ownerSameAsDriver') && errors.vehicle2?.ownerName && <p className="text-red-500 text-sm mt-1">{errors.vehicle2.ownerName.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Compagnie d'assurance</label>
+                  <input 
+                    type="text" 
+                    placeholder="Nom de la compagnie" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2.insuranceCompany")}
+                  />
+                  {errors.vehicle2?.insuranceCompany && <p className="text-red-500 text-sm mt-1">{errors.vehicle2.insuranceCompany.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Numéro de police d'assurance</label>
+                  <input 
+                    type="text" 
+                    placeholder="Numéro de police" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2.insurancePolicy")}
+                  />
+                  {errors.vehicle2?.insurancePolicy && <p className="text-red-500 text-sm mt-1">{errors.vehicle2.insurancePolicy.message}</p>}
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="vehicle2IndirectlyInvolved"
+                    className="w-5 h-5 rounded bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2.indirectlyInvolved")}
+                  />
+                  <label htmlFor="vehicle2IndirectlyInvolved">Indirectement impliqué</label>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="vehicle2AirBrake"
+                    className="w-5 h-5 rounded bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2.airBrake")}
+                  />
+                  <label htmlFor="vehicle2AirBrake">Frein à air</label>
+                </div>
+                
+                <div>
+                  <label className="block mb-1">Véhicule transporté vers/par</label>
+                  <input 
+                    type="text" 
+                    placeholder="Nom du service et destination" 
+                    className="w-full p-3 rounded-lg bg-[#2D2D2D] border border-[#3D3D3D] text-[#f89422]"
+                    {...register("vehicle2TowedBy")}
+                  />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label className="block mb-1">Localisation des dommages</label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mt-2">
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="01" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>01 - Coin avant droit</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="02" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>02 - Avant droit</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="03" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>03 - Centre droit</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="04" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>04 - Arrière droit</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="05" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>05 - Coin arrière droit</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="06" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>06 - Centre arrière</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="07" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>07 - Coin arrière gauche</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="08" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>08 - Arrière gauche</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="09" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>09 - Centre gauche</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="10" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>10 - Avant gauche</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="11" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>11 - Coin avant gauche</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="12" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>12 - Centre avant</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="13" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>13 - Avant complet</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="14" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>14 - Côté droit complet</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="15" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>15 - Arrière complet</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="16" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>16 - Côté gauche complet</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="17" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>17 - Dessus</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="18" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>18 - Dessous</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" value="19" className="w-4 h-4" {...register("vehicle2.damageLocation")} />
+                      <span>19 - Aucun contact</span>
+                    </label>
+                  </div>
+                  {errors.vehicle2?.damageLocation && <p className="text-red-500 text-sm mt-1">{errors.vehicle2.damageLocation.message}</p>}
                 </div>
               </div>
             </div>
