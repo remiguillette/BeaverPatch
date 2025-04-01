@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, ArrowLeft } from 'lucide-react';
 import { AccidentReport } from '@shared/schema';
 import i18n from '@/lib/i18n';
+import { getQueryFn } from '@/lib/queryClient';
 
 // Définition des interfaces pour les types complexes
 interface Vehicle {
@@ -15,10 +16,17 @@ interface Vehicle {
   color: string;
 }
 
-// Type étendu pour AccidentReport
-interface FullAccidentReport extends Omit<AccidentReport, 'vehicle1' | 'vehicle2'> {
+// Type complet pour le rapport d'accident provenant de l'API
+interface FullAccidentReport {
+  id: number;
+  dateTime: string; // Les dates arrivent comme des chaînes de l'API
+  location: string;
+  description: string;
+  weatherConditions: string;
+  roadConditions: string;
   vehicle1: Vehicle;
   vehicle2?: Vehicle;
+  createdAt: string; // Les dates arrivent comme des chaînes de l'API
 }
 
 function formatDate(date: Date | string): string {
@@ -31,12 +39,15 @@ export const PrintReportsPanel: React.FC = () => {
   
   const { data: reports = [], isLoading, error } = useQuery({
     queryKey: ['/api/accident-reports'],
-    queryFn: async () => {
-      const res = await fetch('/api/accident-reports');
-      if (!res.ok) throw new Error('Erreur lors du chargement des rapports');
-      return res.json() as Promise<FullAccidentReport[]>;
-    }
+    queryFn: getQueryFn<FullAccidentReport[]>({
+      on401: "throw"
+    })
   });
+  
+  // Log les rapports pour déboguer
+  useEffect(() => {
+    console.log("Rapports disponibles:", reports);
+  }, [reports]);
 
   const handlePrint = () => {
     // Ouvrir une nouvelle fenêtre pour l'impression
