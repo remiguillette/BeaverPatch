@@ -6,7 +6,7 @@ import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import './leaflet.css';
 import Fuse from 'fuse.js';
-import { useAppContext } from '@/lib/AppContext';
+// import { useAppContext } from '@/lib/AppContext';
 import { GPSLocation } from '@/lib/types';
 
 // Interface pour les résultats de recherche d'adresse
@@ -28,13 +28,11 @@ interface NavigationInstruction {
 }
 
 const GPSPanel: React.FC = () => {
-  // Récupérer le contexte global pour la persistance de la navigation
-  const { 
-    currentDestination, 
-    setCurrentDestination, 
-    isNavigating: globalIsNavigating,
-    setIsNavigating: setGlobalIsNavigating
-  } = useAppContext();
+  // Valeurs par défaut sans contexte (temporaire)
+  const currentDestination = null;
+  const setCurrentDestination = (dest: any) => console.log('setCurrentDestination', dest);
+  const globalIsNavigating = false;
+  const setGlobalIsNavigating = (nav: boolean) => console.log('setIsNavigating', nav);
   const [destination, setDestination] = useState('');
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(
