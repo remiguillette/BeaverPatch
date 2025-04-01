@@ -49,33 +49,74 @@ const GPSPanel: React.FC = () => {
   // Initialiser la carte avec Leaflet
   useEffect(() => {
     if (mapRef.current && !map) {
-      // Configuration de la carte centrée sur l'Ontario
-      const initialMap = L.map(mapRef.current, {
-        center: [43.6532, -79.3832], // Toronto par défaut
-        zoom: 10,
-        zoomControl: false, // Nous allons ajouter nos propres contrôles
-      });
+      console.log("Initialisation de la carte Leaflet...");
+      try {
+        // Configuration de la carte centrée sur l'Ontario
+        const initialMap = L.map(mapRef.current, {
+          center: [43.6532, -79.3832], // Toronto par défaut
+          zoom: 10,
+          zoomControl: false, // Nous allons ajouter nos propres contrôles
+        });
 
-      // Ajouter une couche de tuiles (OpenStreetMap)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(initialMap);
+        // Fonction pour essayer plusieurs sources de tuiles
+        const addTileLayers = () => {
+          // Essayer d'abord OpenStreetMap
+          try {
+            console.log("Tentative de chargement des tuiles OpenStreetMap");
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+              maxZoom: 19,
+            }).addTo(initialMap);
+            console.log("Couche OpenStreetMap chargée avec succès");
+            return true;
+          } catch (e) {
+            console.warn("Erreur lors du chargement des tuiles OpenStreetMap:", e);
+            
+            // Si ça échoue, essayer CartoDB comme alternative
+            try {
+              console.log("Tentative de chargement des tuiles CartoDB");
+              L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, © <a href="https://carto.com/attributions">CARTO</a>',
+                maxZoom: 19
+              }).addTo(initialMap);
+              console.log("Couche CartoDB chargée avec succès");
+              return true;
+            } catch (e2) {
+              console.error("Erreur lors du chargement des tuiles CartoDB:", e2);
+              return false;
+            }
+          }
+        };
 
-      // Conserver la référence à la carte
-      setMap(initialMap);
-      mapInstanceRef.current = initialMap;
+        // Ajouter les tuiles de la carte
+        const tilesLoaded = addTileLayers();
+        if (!tilesLoaded) {
+          console.error("Impossible de charger les couches de carte");
+        }
 
-      // Configurer les icônes personnalisées pour éviter les problèmes de chemins relatifs
-      configureLeafletIcons();
+        // Conserver la référence à la carte
+        setMap(initialMap);
+        mapInstanceRef.current = initialMap;
+        console.log("Carte initialisée avec succès");
 
-      // Charger la base de données d'adresses simulée pour l'Ontario
-      // Dans une version réelle, cela serait remplacé par une API
-      loadAddressDatabase();
+        // Configurer les icônes personnalisées pour éviter les problèmes de chemins relatifs
+        try {
+          configureLeafletIcons();
+        } catch (e) {
+          console.warn("Erreur lors de la configuration des icônes Leaflet:", e);
+        }
+
+        // Charger la base de données d'adresses
+        loadAddressDatabase();
+      } catch (error) {
+        console.error("Erreur critique lors de l'initialisation de la carte:", error);
+        alert("Erreur lors de l'initialisation de la carte. Veuillez rafraîchir la page.");
+      }
 
       // Nettoyer la carte lors du démontage du composant
       return () => {
         if (mapInstanceRef.current) {
+          console.log("Nettoyage de la carte Leaflet");
           mapInstanceRef.current.remove();
           mapInstanceRef.current = null;
         }
@@ -128,33 +169,82 @@ const GPSPanel: React.FC = () => {
   // Obtenir la géolocalisation réelle
   const handleGeolocate = () => {
     if (!navigator.geolocation) {
-      alert("La géolocalisation n'est pas supportée par votre navigateur.");
+      alert(i18n.t('gps.noGeolocationSupport'));
+      // Utiliser une position par défaut
+      const defaultLocation = { lat: 43.6532, lng: -79.3832 }; // Toronto
+      updateUserLocation(defaultLocation.lat, defaultLocation.lng);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        updateUserLocation(latitude, longitude);
-        setLocationPermissionDenied(false);
+    // Options de géolocalisation (haute précision, timeout rapide, etc.)
+    const geoOptions = {
+      enableHighAccuracy: true, // Utiliser GPS si disponible
+      timeout: 10000,          // Timeout après 10 secondes
+      maximumAge: 60000        // Cache de position valide pendant 1 minute
+    };
 
-        // Si une carte existe, centrer dessus
-        if (map) {
-          map.setView([latitude, longitude], 15);
-        }
-      },
-      (error) => {
-        console.error("Erreur de géolocalisation:", error);
-        setLocationPermissionDenied(true);
-        
-        // Utiliser une position par défaut si l'utilisateur refuse la permission
-        const defaultLocation = { lat: 43.6532, lng: -79.3832 }; // Toronto
-        updateUserLocation(defaultLocation.lat, defaultLocation.lng);
-        
-        alert("Permission de géolocalisation refusée. Utilisation d'une position par défaut.");
-      },
-      { enableHighAccuracy: true }
-    );
+    try {
+      navigator.geolocation.getCurrentPosition(
+        // Succès
+        (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            console.log("Position GPS obtenue:", latitude, longitude);
+            updateUserLocation(latitude, longitude);
+            setLocationPermissionDenied(false);
+
+            // Si une carte existe, centrer dessus
+            if (map) {
+              map.setView([latitude, longitude], 15);
+            }
+          } catch (err) {
+            console.error("Erreur lors du traitement de la position:", err);
+            fallbackToDefaultLocation();
+          }
+        },
+        // Erreur
+        (error) => {
+          console.error("Erreur de géolocalisation:", error.code, error.message);
+          setLocationPermissionDenied(true);
+          
+          // Afficher un message d'erreur spécifique selon le type d'erreur
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              console.warn("L'utilisateur a refusé la demande de géolocalisation");
+              alert(i18n.t('gps.locationPermissionDenied') + ". " + i18n.t('gps.useDefaultLocation'));
+              break;
+            case error.POSITION_UNAVAILABLE:
+              console.warn("L'information de localisation n'est pas disponible");
+              alert("Impossible d'obtenir votre position. " + i18n.t('gps.useDefaultLocation'));
+              break;
+            case error.TIMEOUT:
+              console.warn("La demande de localisation a expiré");
+              alert("La demande de localisation a expiré. " + i18n.t('gps.useDefaultLocation'));
+              break;
+            default:
+              alert("Erreur de géolocalisation inconnue. " + i18n.t('gps.useDefaultLocation'));
+          }
+          
+          fallbackToDefaultLocation();
+        },
+        geoOptions
+      );
+    } catch (error) {
+      console.error("Exception lors de la géolocalisation:", error);
+      fallbackToDefaultLocation();
+    }
+  };
+
+  // Utiliser une position par défaut en cas d'échec
+  const fallbackToDefaultLocation = () => {
+    // Position par défaut (Toronto)
+    const defaultLocation = { lat: 43.6532, lng: -79.3832 };
+    updateUserLocation(defaultLocation.lat, defaultLocation.lng);
+    
+    // Centrer la carte sur la position par défaut
+    if (map) {
+      map.setView([defaultLocation.lat, defaultLocation.lng], 10);
+    }
   };
 
   // Mettre à jour la position de l'utilisateur
@@ -210,35 +300,101 @@ const GPSPanel: React.FC = () => {
   // Recherche d'adresse via l'API de géocodage
   const geocodeAddress = async (address: string) => {
     try {
+      console.log("Recherche de l'adresse:", address);
+      
+      // Vérifier si la clé API est disponible
       const apiKey = import.meta.env.VITE_GEOCODING_API_KEY;
-      const url = `https://geocode.maps.co/search?q=${encodeURIComponent(address + ', Ontario, Canada')}&api_key=${apiKey}`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        // Traiter les résultats
-        const results: LocationResult[] = data.slice(0, 5).map((item: any, index: number) => ({
-          id: `geo-${index}`,
-          name: item.display_name,
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon),
-          address: item.display_name
-        }));
-        
-        setSearchResults(results);
-        setShowResults(true);
-        
-        if (results.length > 0) {
-          selectDestination(results[0]);
-        }
-      } else {
-        alert("Aucune adresse trouvée.");
+      if (!apiKey) {
+        console.error("Clé API de géocodage manquante. Utilisation de la recherche locale uniquement.");
+        fallbackToLocalSearch(address);
+        return;
       }
+        
+      try {
+        // Construire l'URL avec l'encodage approprié et ajout de "Ontario, Canada" pour cibler la région
+        const url = `https://geocode.maps.co/search?q=${encodeURIComponent(address + ', Ontario, Canada')}&api_key=${apiKey}`;
+        
+        console.log("Requête API de géocodage...");
+        const response = await fetch(url);
+        
+        // Vérifier si la réponse est valide
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Erreur API géocodage (${response.status}):`, errorText);
+          throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log("Réponse API géocodage:", data);
+        
+        if (Array.isArray(data) && data.length > 0) {
+          // Filtrer les résultats pour ne garder que ceux qui concernent l'Ontario
+          const ontarioResults = data.filter(item => 
+            item.display_name.toLowerCase().includes('ontario') || 
+            item.display_name.toLowerCase().includes('canada')
+          );
+          
+          if (ontarioResults.length > 0) {
+            // Traiter les résultats
+            const results: LocationResult[] = ontarioResults.slice(0, 5).map((item: any, index: number) => ({
+              id: `geo-${index}`,
+              name: item.display_name,
+              lat: parseFloat(item.lat),
+              lng: parseFloat(item.lon),
+              address: item.display_name
+            }));
+            
+            setSearchResults(results);
+            setShowResults(true);
+            
+            if (results.length > 0) {
+              selectDestination(results[0]);
+            }
+            return;
+          } else {
+            console.log("Aucun résultat pour l'Ontario trouvé dans la réponse API");
+          }
+        } else {
+          console.log("Aucun résultat retourné par l'API de géocodage");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la requête de géocodage:", error);
+      }
+      
+      // En cas d'échec avec l'API, nous continuons avec la recherche locale
+      fallbackToLocalSearch(address);
+      
     } catch (error) {
-      console.error("Erreur lors du géocodage de l'adresse:", error);
+      console.error("Erreur globale lors du géocodage de l'adresse:", error);
       alert("Erreur lors de la recherche de l'adresse.");
     }
+  };
+  
+  // Fonction de repli pour la recherche locale
+  const fallbackToLocalSearch = (address: string) => {
+    console.log("Utilisation de la recherche locale pour:", address);
+    
+    if (fuseSearch) {
+      const searchResults = fuseSearch.search(address);
+      const validResults = searchResults
+        .filter(result => result.score && result.score < 0.5)
+        .map(result => result.item);
+      
+      if (validResults.length > 0) {
+        console.log("Résultats de recherche locale trouvés:", validResults.length);
+        setSearchResults(validResults);
+        setShowResults(true);
+        selectDestination(validResults[0]);
+        return;
+      } else {
+        console.log("Aucun résultat trouvé dans la recherche locale");
+      }
+    } else {
+      console.warn("FuseSearch n'est pas initialisé, impossible d'effectuer une recherche locale");
+    }
+    
+    // Si aucun résultat trouvé
+    alert("Aucune adresse trouvée. Veuillez essayer une autre recherche.");
   };
 
   // Sélectionner une destination
@@ -294,9 +450,10 @@ const GPSPanel: React.FC = () => {
       L.latLng(selectedLocation.lat, selectedLocation.lng)
     ];
     
-    // Créer un nouveau contrôle d'itinéraire
+    // Créer un nouveau contrôle d'itinéraire avec options personnalisées
     const newRouteControl = L.Routing.control({
       waypoints,
+      // Options de routage
       routeWhileDragging: false,
       showAlternatives: false,
       lineOptions: {
@@ -310,7 +467,16 @@ const GPSPanel: React.FC = () => {
         extendToWaypoints: true,
         missingRouteTolerance: 0
       },
-      // Ne pas créer de marqueurs supplémentaires dans les waypoints
+      show: false, // Ne pas afficher le panneau de contrôle par défaut
+      collapsible: true, // Permettre au panneau d'être réduit
+      autoRoute: true, // Calculer l'itinéraire automatiquement
+      // Spécifier les options du routeur OSRM avec support du français
+      router: (L.Routing as any).osrmv1({
+        serviceUrl: 'https://router.project-osrm.org/route/v1',
+        profile: 'driving', // Mode de transport (driving, car, bike, foot, etc.)
+        useHints: true
+        // Note: l'option de langue n'est pas disponible dans le type
+      })
     }).addTo(map);
     
     setRouteControl(newRouteControl);
