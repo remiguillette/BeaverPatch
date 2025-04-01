@@ -260,49 +260,50 @@ const GPSPanel: React.FC = () => {
 
     // Mettre à jour ou créer le marqueur utilisateur
     if (map) {
-      // Supprimer le marqueur existant si présent pour éviter des problèmes de rendu
+      // Nettoyer les marqueurs existants
       if (userMarker) {
         map.removeLayer(userMarker);
         setUserMarker(null);
       }
       
-      // Création d'un nouvel icône très visible
-      const userIcon = L.divIcon({
-        className: 'custom-user-marker',
-        html: `<div class="relative">
-                <div class="absolute top-0 left-0 right-0 bottom-0 bg-[#ff0000] rounded-full opacity-30 animate-ping"></div>
-                <div class="relative bg-[#f89422] text-white p-4 rounded-full border-4 border-white shadow-xl flex items-center justify-center font-bold text-lg z-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
-                    <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-              </div>`,
-        iconSize: [64, 64],
-        iconAnchor: [32, 64],
-        popupAnchor: [0, -64]
-      });
-
-      // Ajout d'options spécifiques pour s'assurer qu'il reste au-dessus des autres éléments
-      const markerOptions = { 
-        icon: userIcon,
-        zIndexOffset: 1000,  // Valeur élevée pour s'assurer que c'est au-dessus 
-        riseOnHover: true,
-        riseOffset: 1000
-      };
-
-      // Créer un nouveau marqueur
-      const newUserMarker = L.marker([lat, lng], markerOptions).addTo(map);
-      
-      // Ajouter des informations de position au popup
-      newUserMarker.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-      
-      // Stocker la référence du marqueur
-      setUserMarker(newUserMarker);
-      
-      // Force le rendu du marqueur en l'apportant au premier plan
-      newUserMarker.bringToFront();
-      
-      console.log("Nouveau marqueur de position créé à", lat, lng);
+      try {
+        console.log("Création d'un nouveau marqueur de position à", lat, lng);
+        
+        // MÉTHODE 1: Cercle avec pulsation
+        const positionCircle = L.circle([lat, lng], {
+          color: '#ff0000',       // Bordure rouge
+          fillColor: '#f89422',   // Remplissage orange
+          fillOpacity: 0.8,       // Très opaque
+          weight: 3,              // Bordure épaisse
+          radius: 15,             // Rayon en mètres (assez grand pour être visible)
+          className: 'pulse-circle' // Classe CSS pour l'animation
+        }).addTo(map);
+        
+        // MÉTHODE 2: Cercle d'arrière-plan pour une meilleure visibilité
+        const backgroundCircle = L.circle([lat, lng], {
+          color: '#ffffff',     // Bordure blanche
+          fillColor: '#ffffff', // Remplissage blanc
+          fillOpacity: 0.5,     // Semi-transparent
+          weight: 2,            // Épaisseur de bordure
+          radius: 25,           // Plus grand que le cercle principal
+        }).addTo(map);
+        
+        // Stocker la référence sous forme de groupe
+        const markerGroup = L.layerGroup([backgroundCircle, positionCircle]);
+        setUserMarker(markerGroup as any);
+        
+        // Forcer le zoom pour être sûr que le marqueur est visible
+        if (autoCenter) {
+          map.setView([lat, lng], 17); // Zoom plus proche (17 au lieu de 15)
+        }
+        
+        // Ajouter un popup qui s'affiche au clic sur le cercle
+        positionCircle.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        
+        console.log("Marqueur de position créé avec succès");
+      } catch (error) {
+        console.error("Erreur lors de la création du marqueur:", error);
+      }
     }
   };
 
