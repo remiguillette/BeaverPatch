@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import i18n from '@/lib/i18n';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -6,6 +6,7 @@ import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import './leaflet.css';
 import Fuse from 'fuse.js';
+import { AgentPositionContext } from '@/lib/contexts/AgentPositionContext';
 
 // Interface pour les résultats de recherche d'adresse
 interface LocationResult {
@@ -26,6 +27,7 @@ interface NavigationInstruction {
 }
 
 const GPSPanel: React.FC = () => {
+  const { updateAgentPosition } = useContext(AgentPositionContext);
   const [destination, setDestination] = useState('');
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
@@ -250,6 +252,9 @@ const GPSPanel: React.FC = () => {
   // Mettre à jour la position de l'utilisateur
   const updateUserLocation = (lat: number, lng: number) => {
     setUserLocation({ lat, lng });
+    
+    // Mettre à jour la position dans le contexte global
+    updateAgentPosition({ lat, lng });
 
     // Mettre à jour ou créer le marqueur utilisateur
     if (map) {
@@ -745,42 +750,7 @@ const GPSPanel: React.FC = () => {
           className="h-full w-full bg-[#1A2530]"
         ></div>
         
-        {/* Panneau d'information sur la position de l'agent */}
-        {userLocation && (
-          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-3 text-white z-[900]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-[#f89422] text-black p-1 rounded-full mr-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.5-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11 2 11.3V16c0 .6.4 1 1 1h1"/>
-                    <circle cx="7" cy="17" r="2"/>
-                    <path d="M9 17h6"/>
-                    <circle cx="17" cy="17" r="2"/>
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-sm opacity-75">Position de l'agent</div>
-                  <div className="font-bold text-lg">{userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}</div>
-                </div>
-              </div>
-              <button 
-                className="bg-[#f89422] text-black font-bold px-4 py-2 rounded-lg"
-                onClick={() => {
-                  if (userLocation && map) {
-                    map.setView([userLocation.lat, userLocation.lng], 15);
-                    
-                    // Mettre à jour le popup avec les informations actuelles
-                    if (userMarker) {
-                      userMarker.bindPopup(`Position actuelle: ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`).openPopup();
-                    }
-                  }
-                }}
-              >
-                Centrer
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Le panneau d'information a été retiré d'ici pour être intégré dans le Footer */}
         
         {/* Instructions de navigation */}
         {isNavigating && currentInstruction && (

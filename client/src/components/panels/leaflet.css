@@ -5,9 +5,28 @@
 
 /* Personnalisation des marqueurs */
 .custom-user-marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+}
+
+.custom-user-marker div {
+  background-color: #f89422 !important;
+  color: black !important;
+  border-radius: 9999px !important;
+  padding: 4px !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.custom-user-marker svg {
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important;
+  stroke-width: 2px !important;
 }
 
 /* Personnalisation du popup */
