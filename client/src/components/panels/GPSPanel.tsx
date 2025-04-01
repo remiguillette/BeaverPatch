@@ -184,72 +184,16 @@ const GPSPanel: React.FC = () => {
     }
   };
 
-  // Obtenir la géolocalisation réelle
+  // Utiliser directement une position par défaut pour le développement/test
   const handleGeolocate = () => {
-    if (!navigator.geolocation) {
-      alert(i18n.t('gps.noGeolocationSupport'));
-      // Utiliser une position par défaut
-      const defaultLocation = { lat: 43.0716, lng: -79.1010 }; // Région de Niagara Falls par défaut
-      updateUserLocation(defaultLocation.lat, defaultLocation.lng);
-      return;
-    }
-
-    // Options de géolocalisation (haute précision, timeout rapide, etc.)
-    const geoOptions = {
-      enableHighAccuracy: true, // Utiliser GPS si disponible
-      timeout: 10000,          // Timeout après 10 secondes
-      maximumAge: 60000        // Cache de position valide pendant 1 minute
-    };
-
-    try {
-      navigator.geolocation.getCurrentPosition(
-        // Succès
-        (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            console.log("Position GPS obtenue:", latitude, longitude);
-            updateUserLocation(latitude, longitude);
-            setLocationPermissionDenied(false);
-
-            // Si une carte existe, centrer dessus
-            if (map) {
-              map.setView([latitude, longitude], 15);
-            }
-          } catch (err) {
-            console.error("Erreur lors du traitement de la position:", err);
-            fallbackToDefaultLocation();
-          }
-        },
-        // Erreur
-        (error) => {
-          console.error("Erreur de géolocalisation:", error.code, error.message);
-          setLocationPermissionDenied(true);
-          
-          // Afficher un message d'erreur spécifique selon le type d'erreur
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              console.warn("L'utilisateur a refusé la demande de géolocalisation");
-              alert(i18n.t('gps.locationPermissionDenied') + ". " + i18n.t('gps.useDefaultLocation'));
-              break;
-            case error.POSITION_UNAVAILABLE:
-              console.warn("L'information de localisation n'est pas disponible");
-              alert("Impossible d'obtenir votre position. " + i18n.t('gps.useDefaultLocation'));
-              break;
-            case error.TIMEOUT:
-              console.warn("La demande de localisation a expiré");
-              alert("La demande de localisation a expiré. " + i18n.t('gps.useDefaultLocation'));
-              break;
-            default:
-              alert("Erreur de géolocalisation inconnue. " + i18n.t('gps.useDefaultLocation'));
-          }
-          
-          fallbackToDefaultLocation();
-        },
-        geoOptions
-      );
-    } catch (error) {
-      console.error("Exception lors de la géolocalisation:", error);
-      fallbackToDefaultLocation();
+    console.log("Utilisation de la position par défaut pour le développement");
+    // Position par défaut (Région de Niagara Falls)
+    const defaultLocation = { lat: 43.0716, lng: -79.1010 };
+    updateUserLocation(defaultLocation.lat, defaultLocation.lng);
+    
+    // Centrer la carte sur la position par défaut
+    if (map) {
+      map.setView([defaultLocation.lat, defaultLocation.lng], 12);
     }
   };
 
@@ -753,23 +697,13 @@ const GPSPanel: React.FC = () => {
     };
     
     try {
-      console.log("Démarrage du suivi GPS continu...");
-      const id = navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          console.log("Position GPS mise à jour:", latitude, longitude);
-          updateUserLocation(latitude, longitude);
-          
-          // Centrer automatiquement la carte si activé
-          if (autoCenter && map) {
-            map.setView([latitude, longitude], 15);
-          }
-        },
-        (error) => {
-          console.error("Erreur de suivi GPS:", error.message);
-        },
-        geoOptions
-      );
+      console.log("Simulant une position fixe pour le développement...");
+      // Position par défaut (Niagara Falls)
+      const defaultLocation = { lat: 43.0716, lng: -79.1010 };
+      updateUserLocation(defaultLocation.lat, defaultLocation.lng);
+      
+      // Simuler un ID de suivi pour maintenir la cohérence du code
+      const id = 999;
       
       setWatchId(id);
       console.log("Suivi GPS démarré avec ID:", id);
@@ -778,11 +712,10 @@ const GPSPanel: React.FC = () => {
     }
   };
   
-  // Arrêter le suivi de position
+  // Arrêter le suivi de position (version simplifiée)
   const stopPositionTracking = () => {
     if (watchId !== null) {
-      console.log("Arrêt du suivi GPS, ID:", watchId);
-      navigator.geolocation.clearWatch(watchId);
+      console.log("Nettoyage du suivi simulé, ID:", watchId);
       setWatchId(null);
     }
   };
