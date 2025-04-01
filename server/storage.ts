@@ -47,11 +47,11 @@ export class MemStorage implements IStorage {
   private currentWeatherId: number;
 
   constructor() {
-    this.users = new Map();
-    this.weatherEntries = new Map();
-    this.accidentReports = new Map();
-    this.violationReports = new Map();
-    this.wantedPersons = new Map();
+    this.users = new Map<number, User>();
+    this.weatherEntries = new Map<string, Weather>();
+    this.accidentReports = new Map<number, AccidentReport>();
+    this.violationReports = new Map<number, ViolationReport>();
+    this.wantedPersons = new Map<number, WantedPerson>();
     
     this.currentUserId = 1;
     this.currentAccidentId = 1;
@@ -59,9 +59,10 @@ export class MemStorage implements IStorage {
     this.currentWantedId = 1;
     this.currentWeatherId = 1;
     
-    // Initialize with sample wanted persons
+    // Initialize with sample data
     this.initializeWantedPersons();
     this.initializeWeather();
+    this.initializeAccidentReports();
   }
 
   private initializeWantedPersons() {
@@ -114,6 +115,55 @@ export class MemStorage implements IStorage {
     });
   }
 
+  private initializeAccidentReports() {
+    // Créer des exemples de rapports d'accident
+    const sampleReports: InsertAccidentReport[] = [
+      {
+        dateTime: new Date("2025-03-15T14:30:00"),
+        location: "Intersection Rue King et Avenue Queen, Niagara Falls",
+        description: "Collision latérale à une intersection",
+        weatherConditions: "Pluie légère",
+        roadConditions: "Chaussée mouillée",
+        vehicle1: {
+          licensePlate: "ABCD 123",
+          makeModel: "Honda Civic",
+          year: 2020,
+          color: "Bleu"
+        },
+        vehicle2: {
+          licensePlate: "WXYZ 789",
+          makeModel: "Toyota Corolla",
+          year: 2018,
+          color: "Rouge"
+        }
+      },
+      {
+        dateTime: new Date("2025-03-20T09:15:00"),
+        location: "Autoroute QEW, km 35, direction Toronto",
+        description: "Collision arrière dans le trafic dense",
+        weatherConditions: "Ensoleillé",
+        roadConditions: "Sec",
+        vehicle1: {
+          licensePlate: "EFGH 456",
+          makeModel: "Ford F-150",
+          year: 2021,
+          color: "Noir"
+        },
+        vehicle2: {
+          licensePlate: "LMNO 321",
+          makeModel: "Hyundai Tucson",
+          year: 2019,
+          color: "Blanc"
+        }
+      }
+    ];
+
+    // Ajouter les rapports d'exemple à la base de données
+    sampleReports.forEach(report => {
+      this.createAccidentReport(report);
+    });
+  }
+
   // User methods (from existing)
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
@@ -148,7 +198,8 @@ export class MemStorage implements IStorage {
         ...insertWeather,
         updatedAt: new Date()
       };
-      this.weatherEntries.set(existingWeather.id, updatedWeather);
+      // Utiliser le bon typage pour la clé
+      this.weatherEntries.set(String(existingWeather.id), updatedWeather);
       return updatedWeather;
     } else {
       const id = this.currentWeatherId++;
@@ -157,7 +208,8 @@ export class MemStorage implements IStorage {
         id,
         updatedAt: new Date()
       };
-      this.weatherEntries.set(id, weather);
+      // Utiliser le bon typage pour la clé
+      this.weatherEntries.set(String(id), weather);
       return weather;
     }
   }
@@ -166,11 +218,20 @@ export class MemStorage implements IStorage {
   async createAccidentReport(insertReport: InsertAccidentReport): Promise<AccidentReport> {
     const id = this.currentAccidentId++;
     const now = new Date();
+    
+    // Créer explicitement l'objet en respectant la structure requise du type AccidentReport
     const report: AccidentReport = {
-      ...insertReport,
       id,
+      dateTime: insertReport.dateTime,
+      location: insertReport.location,
+      description: insertReport.description,
+      weatherConditions: insertReport.weatherConditions,
+      roadConditions: insertReport.roadConditions,
+      vehicle1: insertReport.vehicle1,
+      vehicle2: insertReport.vehicle2 || null,
       createdAt: now
     };
+    
     this.accidentReports.set(id, report);
     return report;
   }
@@ -187,11 +248,23 @@ export class MemStorage implements IStorage {
   async createViolationReport(insertReport: InsertViolationReport): Promise<ViolationReport> {
     const id = this.currentViolationId++;
     const now = new Date();
+    
+    // Créer explicitement l'objet en respectant la structure requise du type ViolationReport
     const report: ViolationReport = {
-      ...insertReport,
       id,
+      dateTime: insertReport.dateTime,
+      location: insertReport.location,
+      description: insertReport.description,
+      violationType: insertReport.violationType,
+      severity: insertReport.severity,
+      licensePlate: insertReport.licensePlate,
+      makeModel: insertReport.makeModel,
+      driverName: insertReport.driverName,
+      licenseNumber: insertReport.licenseNumber,
+      notes: insertReport.notes || null,
       createdAt: now
     };
+    
     this.violationReports.set(id, report);
     return report;
   }
