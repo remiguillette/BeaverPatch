@@ -44,6 +44,8 @@ const GPSPanel: React.FC = () => {
   const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
   const [addressDatabase, setAddressDatabase] = useState<LocationResult[]>([]);
   const [fuseSearch, setFuseSearch] = useState<Fuse<LocationResult> | null>(null);
+  const [watchId, setWatchId] = useState<number | null>(null);
+  const [autoCenter, setAutoCenter] = useState(true);
   
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -261,19 +263,19 @@ const GPSPanel: React.FC = () => {
       if (userMarker) {
         userMarker.setLatLng([lat, lng]);
       } else {
-        // Créer un marqueur utilisateur personnalisé avec un icône de voiture
+        // Créer un marqueur utilisateur personnalisé avec un icône de voiture plus visible
         const userIcon = L.divIcon({
           className: 'custom-user-marker',
-          html: `<div class="bg-[#f89422] text-black p-1 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          html: `<div class="bg-[#f89422] text-black p-2 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.5-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11 2 11.3V16c0 .6.4 1 1 1h1"/>
                     <circle cx="7" cy="17" r="2"/>
                     <path d="M9 17h6"/>
                     <circle cx="17" cy="17" r="2"/>
                   </svg>
                 </div>`,
-          iconSize: [30, 30],
-          iconAnchor: [15, 15],
+          iconSize: [42, 42],
+          iconAnchor: [21, 21],
         });
 
         const newUserMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
@@ -680,9 +682,71 @@ const GPSPanel: React.FC = () => {
     }
   };
 
+  // Fonction pour centrer automatiquement la carte sur l'utilisateur
+  const centerMapOnUser = () => {
+    if (map && userLocation) {
+      map.setView([userLocation.lat, userLocation.lng], 15);
+    }
+  };
+
+  // Démarrer le suivi continu de position
+  const startPositionTracking = () => {
+    if (!navigator.geolocation) {
+      console.warn("La géolocalisation n'est pas supportée par ce navigateur");
+      return;
+    }
+    
+    if (watchId !== null) {
+      stopPositionTracking();
+    }
+    
+    const geoOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000,          
+      maximumAge: 5000        // Réduire le cache pour des mises à jour plus fréquentes
+    };
+    
+    try {
+      console.log("Démarrage du suivi GPS continu...");
+      const id = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          console.log("Position GPS mise à jour:", latitude, longitude);
+          updateUserLocation(latitude, longitude);
+          
+          // Centrer automatiquement la carte si activé
+          if (autoCenter && map) {
+            map.setView([latitude, longitude], 15);
+          }
+        },
+        (error) => {
+          console.error("Erreur de suivi GPS:", error.message);
+        },
+        geoOptions
+      );
+      
+      setWatchId(id);
+      console.log("Suivi GPS démarré avec ID:", id);
+    } catch (error) {
+      console.error("Erreur lors du démarrage du suivi GPS:", error);
+    }
+  };
+  
+  // Arrêter le suivi de position
+  const stopPositionTracking = () => {
+    if (watchId !== null) {
+      console.log("Arrêt du suivi GPS, ID:", watchId);
+      navigator.geolocation.clearWatch(watchId);
+      setWatchId(null);
+    }
+  };
+  
   useEffect(() => {
     // Initialiser la position de l'utilisateur au chargement
     handleGeolocate();
+    
+    // Démarrer le suivi continu de position
+    startPositionTracking();
     
     // Obtenir les voix disponibles pour la synthèse vocale
     if ('speechSynthesis' in window) {
@@ -690,6 +754,11 @@ const GPSPanel: React.FC = () => {
         window.speechSynthesis.getVoices();
       };
     }
+    
+    // Nettoyer le suivi à la fermeture du composant
+    return () => {
+      stopPositionTracking();
+    };
   }, []);
 
   return (
@@ -749,6 +818,29 @@ const GPSPanel: React.FC = () => {
           ref={mapRef} 
           className="h-full w-full bg-[#1A2530]"
         ></div>
+        
+        {/* Bouton pour centrer sur l'utilisateur */}
+        <div className="absolute right-4 top-4 z-[1000] flex flex-col gap-2">
+          <button 
+            className="bg-[#2D2D2D] p-3 rounded-lg hover:bg-[#3D3D3D] transition-colors"
+            onClick={centerMapOnUser}
+            title="Centrer sur ma position"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#f89422]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+          
+          <button 
+            className={`p-3 rounded-lg transition-colors ${autoCenter ? 'bg-[#f89422] text-black' : 'bg-[#2D2D2D] text-white'}`}
+            onClick={() => setAutoCenter(!autoCenter)}
+            title={autoCenter ? "Désactiver le centrage automatique" : "Activer le centrage automatique"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </button>
+        </div>
         
         {/* Le panneau d'information a été retiré d'ici pour être intégré dans le Footer */}
         
