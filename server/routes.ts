@@ -37,10 +37,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Accident report routes
   app.post("/api/accident-reports", async (req, res) => {
     try {
-      const validationResult = insertAccidentReportSchema.safeParse(req.body);
+      // Préparer les données pour la validation
+      // Assurons-nous que dateTime est converti en Date si c'est une chaîne
+      const data = {
+        ...req.body,
+        dateTime: req.body.dateTime ? new Date(req.body.dateTime) : undefined
+      };
+      
+      console.log("Accident report data to validate:", data);
+      
+      const validationResult = insertAccidentReportSchema.safeParse(data);
       
       if (!validationResult.success) {
         const errorMessage = fromZodError(validationResult.error).message;
+        console.error("Validation error:", errorMessage);
         return res.status(400).json({ message: errorMessage });
       }
       
