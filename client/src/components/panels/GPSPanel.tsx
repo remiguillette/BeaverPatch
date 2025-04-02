@@ -216,37 +216,32 @@ const GPSPanel: React.FC = () => {
     if (!map) return;
 
     try {
-      // Si le marqueur existe déjà, mettre à jour sa position
+      // Supprimer le marqueur existant s'il existe
       if (userMarker) {
-        const layers = userMarker.getLayers();
-        layers.forEach(layer => {
-          if (layer instanceof L.Circle) {
-            layer.setLatLng([lat, lng]);
-          }
-        });
-      } else {
-        // Créer les nouveaux cercles seulement si aucun marqueur n'existe
-        const positionCircle = L.circle([lat, lng], {
-          color: '#ff0000',
-          fillColor: '#f89422',
-          fillOpacity: 0.8,
-          weight: 3,
-          radius: 15,
-          className: 'pulse-circle'
-        });
-        
-        const backgroundCircle = L.circle([lat, lng], {
-          color: '#ffffff',
-          fillColor: '#ffffff',
-          fillOpacity: 0.5,
-          weight: 2,
-          radius: 25,
-        });
-        
-        const markerGroup = L.layerGroup([backgroundCircle, positionCircle]).addTo(map);
-        positionCircle.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        setUserMarker(markerGroup);
+        userMarker.remove();
       }
+
+      // Créer un nouveau groupe de marqueurs
+      const positionCircle = L.circle([lat, lng], {
+        color: '#ff0000',
+        fillColor: '#f89422',
+        fillOpacity: 0.8,
+        weight: 3,
+        radius: 15,
+        className: 'pulse-circle'
+      });
+      
+      const backgroundCircle = L.circle([lat, lng], {
+        color: '#ffffff',
+        fillColor: '#ffffff',
+        fillOpacity: 0.5,
+        weight: 2,
+        radius: 25,
+      });
+      
+      const markerGroup = L.layerGroup([backgroundCircle, positionCircle]).addTo(map);
+      positionCircle.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+      setUserMarker(markerGroup);
       
       // Centrer la carte si autoCenter est activé
       if (autoCenter) {
