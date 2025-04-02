@@ -217,30 +217,26 @@ const GPSPanel: React.FC = () => {
     if (!mapInstanceRef.current) return;
 
     try {
-      // Create marker if it doesn't exist, update if it does
-      try {
-        if (!userMarker && map) {
-          const marker = L.marker([lat, lng], {
-            icon: L.icon({
-              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-              popupAnchor: [1, -34],
-              shadowSize: [41, 41]
-            })
-          });
-          
-          marker.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-          marker.addTo(map);
-          setUserMarker(marker);
-        } else if (userMarker && map) {
-          const newLatLng = L.latLng(lat, lng);
-          userMarker.setLatLng(newLatLng);
-          userMarker.getPopup()?.setContent(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la mise à jour du marqueur:", error);
+      if (!map) return;
+      
+      if (!userMarker) {
+        const marker = L.marker([lat, lng], {
+          icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          }),
+          zIndexOffset: 1000
+        }).addTo(map);
+        
+        marker.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        setUserMarker(marker);
+      } else {
+        userMarker.setLatLng([lat, lng]);
+        userMarker.getPopup()?.setContent(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       }
       
       // Centrer la carte si autoCenter est activé
