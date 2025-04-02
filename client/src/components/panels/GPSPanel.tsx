@@ -8,6 +8,7 @@ import './leaflet.css';
 import Fuse from 'fuse.js';
 // import { useAppContext } from '@/lib/AppContext';
 import { GPSLocation } from '@/lib/types';
+import { AgentPositionContext } from '@/lib/contexts/AgentPositionContext';
 
 // Interface pour les résultats de recherche d'adresse
 interface LocationResult {
@@ -210,9 +211,12 @@ const GPSPanel: React.FC = () => {
   };
 
   // Mettre à jour la position de l'utilisateur
+  const { updateAgentPosition } = useContext(AgentPositionContext);
+  
   const updateUserLocation = (lat: number, lng: number) => {
     if (userLocation?.lat === lat && userLocation?.lng === lng) return;
     setUserLocation({ lat, lng });
+    updateAgentPosition({ lat, lng });
     
     if (!mapInstanceRef.current) return;
 
