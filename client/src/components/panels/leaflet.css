@@ -41,6 +41,16 @@
 /* Improve map controls */
 .leaflet-control-zoom {
   margin-top: 60px !important;
+  z-index: 1000;
+}
+
+.leaflet-control-container .leaflet-control {
+  clear: both;
+  pointer-events: auto;
+}
+
+.leaflet-container {
+  touch-action: none;
 }
 
 /* Make sure the user marker is always on top */

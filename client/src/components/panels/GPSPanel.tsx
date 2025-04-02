@@ -73,7 +73,11 @@ const GPSPanel: React.FC = () => {
         const initialMap = L.map(mapRef.current, {
           center: [43.6532, -79.3832], // Toronto par défaut
           zoom: 10,
-          zoomControl: false, // Nous allons ajouter nos propres contrôles
+          zoomControl: true,
+          dragging: true,
+          scrollWheelZoom: true,
+          doubleClickZoom: true,
+          touchZoom: true
         });
 
         // Fonction pour essayer plusieurs sources de tuiles
