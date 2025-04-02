@@ -66,7 +66,7 @@ const GPSPanel: React.FC = () => {
 
   // Initialiser la carte avec Leaflet
   useEffect(() => {
-    if (mapRef.current && !map) {
+    if (mapRef.current && !mapInstanceRef.current) {
       console.log("Initialisation de la carte Leaflet...");
       try {
         // Configuration de la carte centrée sur l'Ontario
@@ -211,9 +211,10 @@ const GPSPanel: React.FC = () => {
 
   // Mettre à jour la position de l'utilisateur
   const updateUserLocation = (lat: number, lng: number) => {
+    if (userLocation?.lat === lat && userLocation?.lng === lng) return;
     setUserLocation({ lat, lng });
     
-    if (!map) return;
+    if (!mapInstanceRef.current) return;
 
     try {
       // Create marker if it doesn't exist, update if it does
