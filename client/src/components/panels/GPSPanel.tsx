@@ -72,13 +72,19 @@ const GPSPanel: React.FC = () => {
         // Configuration de la carte centrée sur l'Ontario
         const initialMap = L.map(mapRef.current, {
           center: [43.6532, -79.3832], // Toronto par défaut
-          zoom: 10,
+          zoom: 13,
           zoomControl: true,
           dragging: true,
           scrollWheelZoom: true,
           doubleClickZoom: true,
-          touchZoom: true
+          touchZoom: true,
+          tap: true,
+          keyboard: true,
+          inertia: true
         });
+
+        // Disable auto-center by default
+        setAutoCenter(false);
 
         // Fonction pour essayer plusieurs sources de tuiles
         const addTileLayers = () => {
@@ -263,8 +269,8 @@ const GPSPanel: React.FC = () => {
         userMarker.getPopup()?.setContent(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       }
       
-      // Centrer la carte si autoCenter est activé
-      if (autoCenter) {
+      // Only auto-center on first position update or when explicitly requested
+      if (autoCenter && (!userLocation || (userLocation.lat === 0 && userLocation.lng === 0))) {
         map.setView([lat, lng], 17, { animate: true });
       }
     } catch (error) {
