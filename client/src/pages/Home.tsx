@@ -8,21 +8,22 @@ import AccidentReportPanel from '@/components/panels/AccidentReportPanel';
 import TrafficViolationPanel from '@/components/panels/TrafficViolationPanel';
 import WantedPersonPanel from '@/components/panels/WantedPersonPanel';
 import PrintReportsPanel from '@/components/panels/PrintReportsPanel';
+import { AppProvider } from '@/lib/AppContext'; // Added import
 
 const Home: React.FC = () => {
   const [activePanel, setActivePanel] = useState<PanelType>('gps');
   // In a real application, this would be determined by actual network conditions
   // but for this implementation, we're keeping it static
   const networkStatus: NetworkStatus = 'excellent';
-  
+
   const handlePanelChange = (panel: PanelType) => {
     setActivePanel(panel);
   };
-  
+
   return (
     <div className="flex flex-col h-screen w-screen bg-[#121212] text-[#f89422]">
       <Header />
-      
+
       {/* Panel Navigation */}
       <div className="bg-[#1E1E1E] flex justify-center space-x-4 py-3 px-4">
         <button 
@@ -76,16 +77,18 @@ const Home: React.FC = () => {
           {i18n.t('panels.printReports')}
         </button>
       </div>
-      
+
       {/* Main Content */}
       <main className="flex-1 overflow-hidden relative">
-        {activePanel === 'gps' && <GPSPanel />}
-        {activePanel === 'accident-report' && <AccidentReportPanel />}
-        {activePanel === 'violation-report' && <TrafficViolationPanel />}
-        {activePanel === 'wanted-persons' && <WantedPersonPanel />}
-        {activePanel === 'print-reports' && <PrintReportsPanel />}
+        <AppProvider> {/* AppProvider added here */}
+          {activePanel === 'gps' && <GPSPanel />}
+          {activePanel === 'accident-report' && <AccidentReportPanel />}
+          {activePanel === 'violation-report' && <TrafficViolationPanel />}
+          {activePanel === 'wanted-persons' && <WantedPersonPanel />}
+          {activePanel === 'print-reports' && <PrintReportsPanel />}
+        </AppProvider> {/* Closing AppProvider */}
       </main>
-      
+
       <Footer networkStatus={networkStatus} />
     </div>
   );
