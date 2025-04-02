@@ -72,20 +72,9 @@ const GPSPanel: React.FC = () => {
         // Configuration de la carte centrée sur l'Ontario
         const initialMap = L.map(mapRef.current, {
           center: [43.6532, -79.3832], // Toronto par défaut
-          zoom: 13,
-          zoomControl: true,
-          dragging: true,
-          scrollWheelZoom: true,
-          doubleClickZoom: true,
-          touchZoom: true,
-          tap: true,
-          keyboard: true,
-          inertia: true,
-          trackResize: true
-        }).setView([43.6532, -79.3832], 13);
-
-        // Disable auto-center by default
-        setAutoCenter(false);
+          zoom: 10,
+          zoomControl: false, // Nous allons ajouter nos propres contrôles
+        });
 
         // Fonction pour essayer plusieurs sources de tuiles
         const addTileLayers = () => {
@@ -200,31 +189,11 @@ const GPSPanel: React.FC = () => {
     console.log("Utilisation de la position par défaut pour le développement");
     // Position par défaut (Région de Niagara Falls)
     const defaultLocation = { lat: 43.0716, lng: -79.1010 };
+    updateUserLocation(defaultLocation.lat, defaultLocation.lng);
     
-    // Attendre que la carte soit complètement initialisée
-    if (map && mapInstanceRef.current) {
+    // Centrer la carte sur la position par défaut
+    if (map) {
       map.setView([defaultLocation.lat, defaultLocation.lng], 12);
-      // Force remove existing marker if any
-      if (userMarker) {
-        map.removeLayer(userMarker);
-        setUserMarker(null);
-      }
-      // Create new marker
-      const marker = L.marker([defaultLocation.lat, defaultLocation.lng], {
-        icon: L.icon({
-          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41]
-        }),
-        zIndexOffset: 1000
-      }).addTo(map);
-      
-      marker.bindPopup(`<b>Votre position actuelle</b><br>${defaultLocation.lat.toFixed(6)}, ${defaultLocation.lng.toFixed(6)}`);
-      setUserMarker(marker);
-      setUserLocation(defaultLocation);
     }
   };
 
@@ -270,9 +239,9 @@ const GPSPanel: React.FC = () => {
         userMarker.getPopup()?.setContent(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       }
       
-      // Only auto-center if explicitly enabled by user
+      // Centrer la carte si autoCenter est activé
       if (autoCenter) {
-        map.setView([lat, lng], map.getZoom(), { animate: true });
+        map.setView([lat, lng], 17, { animate: true });
       }
     } catch (error) {
       console.error("Erreur lors de la mise à jour du marqueur:", error);
