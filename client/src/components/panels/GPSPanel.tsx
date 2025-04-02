@@ -80,8 +80,9 @@ const GPSPanel: React.FC = () => {
           touchZoom: true,
           tap: true,
           keyboard: true,
-          inertia: true
-        });
+          inertia: true,
+          trackResize: true
+        }).setView([43.6532, -79.3832], 13);
 
         // Disable auto-center by default
         setAutoCenter(false);
@@ -269,9 +270,9 @@ const GPSPanel: React.FC = () => {
         userMarker.getPopup()?.setContent(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       }
       
-      // Only auto-center on first position update or when explicitly requested
-      if (autoCenter && (!userLocation || (userLocation.lat === 0 && userLocation.lng === 0))) {
-        map.setView([lat, lng], 17, { animate: true });
+      // Only auto-center if explicitly enabled by user
+      if (autoCenter) {
+        map.setView([lat, lng], map.getZoom(), { animate: true });
       }
     } catch (error) {
       console.error("Erreur lors de la mise à jour du marqueur:", error);
