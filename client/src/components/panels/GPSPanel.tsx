@@ -216,32 +216,32 @@ const GPSPanel: React.FC = () => {
     if (!map) return;
 
     try {
-      // Supprimer le marqueur existant s'il existe
-      if (userMarker) {
-        userMarker.remove();
+      // Create marker if it doesn't exist, update if it does
+      if (!userMarker) {
+        const marker = L.marker([lat, lng], {
+          icon: L.divIcon({
+            className: 'custom-user-marker',
+            html: `
+              <div style="
+                width: 30px;
+                height: 30px;
+                background: #f89422;
+                border: 3px solid #ffffff;
+                border-radius: 50%;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+              "></div>
+            `,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+          })
+        }).addTo(map);
+        
+        marker.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        setUserMarker(marker);
+      } else {
+        userMarker.setLatLng([lat, lng]);
+        userMarker.setPopupContent(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       }
-
-      // Créer un nouveau groupe de marqueurs
-      const positionCircle = L.circle([lat, lng], {
-        color: '#ff0000',
-        fillColor: '#f89422',
-        fillOpacity: 0.8,
-        weight: 3,
-        radius: 15,
-        className: 'pulse-circle'
-      });
-      
-      const backgroundCircle = L.circle([lat, lng], {
-        color: '#ffffff',
-        fillColor: '#ffffff',
-        fillOpacity: 0.5,
-        weight: 2,
-        radius: 25,
-      });
-      
-      const markerGroup = L.layerGroup([backgroundCircle, positionCircle]).addTo(map);
-      positionCircle.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-      setUserMarker(markerGroup);
       
       // Centrer la carte si autoCenter est activé
       if (autoCenter) {
