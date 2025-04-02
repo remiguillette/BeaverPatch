@@ -189,11 +189,31 @@ const GPSPanel: React.FC = () => {
     console.log("Utilisation de la position par défaut pour le développement");
     // Position par défaut (Région de Niagara Falls)
     const defaultLocation = { lat: 43.0716, lng: -79.1010 };
-    updateUserLocation(defaultLocation.lat, defaultLocation.lng);
     
-    // Centrer la carte sur la position par défaut
-    if (map) {
+    // Attendre que la carte soit complètement initialisée
+    if (map && mapInstanceRef.current) {
       map.setView([defaultLocation.lat, defaultLocation.lng], 12);
+      // Force remove existing marker if any
+      if (userMarker) {
+        map.removeLayer(userMarker);
+        setUserMarker(null);
+      }
+      // Create new marker
+      const marker = L.marker([defaultLocation.lat, defaultLocation.lng], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        }),
+        zIndexOffset: 1000
+      }).addTo(map);
+      
+      marker.bindPopup(`<b>Votre position actuelle</b><br>${defaultLocation.lat.toFixed(6)}, ${defaultLocation.lng.toFixed(6)}`);
+      setUserMarker(marker);
+      setUserLocation(defaultLocation);
     }
   };
 
