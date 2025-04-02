@@ -158,16 +158,37 @@ const GPSPanel: React.FC = () => {
     try {
       // Données simulées pour l'Ontario
       const ontarioAddresses: LocationResult[] = [
-        { id: '1', name: '810 Rue Main, Niagara Falls, ON', lat: 43.104, lng: -79.068, address: '810 Rue Main, Niagara Falls, Ontario' },
-        { id: '2', name: 'Chutes du Niagara, ON', lat: 43.0962, lng: -79.0377, address: 'Niagara Falls, Ontario' },
-        { id: '3', name: 'Centre-ville de Toronto, ON', lat: 43.6532, lng: -79.3832, address: 'Downtown Toronto, Ontario' },
-        { id: '4', name: 'Highway 401, Toronto, ON', lat: 43.7615, lng: -79.3435, address: 'Highway 401, Toronto, Ontario' },
-        { id: '5', name: 'Aéroport Pearson, Mississauga, ON', lat: 43.6777, lng: -79.6248, address: 'Toronto Pearson International Airport, Mississauga, Ontario' },
-        { id: '6', name: 'Welland, ON', lat: 42.9922, lng: -79.2482, address: 'Welland, Ontario' },
-        { id: '7', name: 'St. Catharines, ON', lat: 43.1594, lng: -79.2469, address: 'St. Catharines, Ontario' },
-        { id: '8', name: 'Hamilton, ON', lat: 43.2557, lng: -79.8711, address: 'Hamilton, Ontario' },
-        { id: '9', name: 'London, ON', lat: 42.9849, lng: -81.2453, address: 'London, Ontario' },
-        { id: '10', name: 'Ottawa, ON', lat: 45.4215, lng: -75.6972, address: 'Ottawa, Ontario' },
+        // Villes principales
+        { id: '1', name: 'Welland, ON', lat: 42.9922, lng: -79.2482, address: 'Welland, Ontario' },
+        { id: '2', name: 'St. Catharines, ON', lat: 43.1594, lng: -79.2469, address: 'St. Catharines, Ontario' },
+        { id: '3', name: 'Niagara Falls, ON', lat: 43.0896, lng: -79.0849, address: 'Niagara Falls, Ontario' },
+        { id: '4', name: 'Fort Erie, ON', lat: 42.9087, lng: -78.9711, address: 'Fort Erie, Ontario' },
+        { id: '5', name: 'Port Colborne, ON', lat: 42.8676, lng: -79.2513, address: 'Port Colborne, Ontario' },
+        
+        // Points d'intérêt Niagara
+        { id: '6', name: 'Chutes du Niagara', lat: 43.0962, lng: -79.0377, address: 'Niagara Falls, Ontario' },
+        { id: '7', name: 'Clifton Hill, Niagara Falls', lat: 43.0913, lng: -79.0744, address: 'Clifton Hill, Niagara Falls, Ontario' },
+        { id: '8', name: 'Casino Niagara', lat: 43.0927, lng: -79.0705, address: 'Casino Niagara, Niagara Falls, Ontario' },
+        
+        // Centres commerciaux et magasins
+        { id: '9', name: 'Walmart Supercentre Welland', lat: 42.9847, lng: -79.2483, address: '102 Primeway Dr, Welland, Ontario' },
+        { id: '10', name: 'Seaway Mall', lat: 43.0023, lng: -79.2482, address: '800 Niagara St, Welland, Ontario' },
+        { id: '11', name: 'Walmart Niagara Falls', lat: 43.1283, lng: -79.0859, address: '7481 Pin Oak Dr, Niagara Falls, Ontario' },
+        { id: '12', name: 'Pen Centre', lat: 43.1397, lng: -79.2634, address: '221 Glendale Ave, St. Catharines, Ontario' },
+        
+        // Services d'urgence
+        { id: '13', name: 'Welland Hospital', lat: 43.0247, lng: -79.2482, address: '65 Third Street, Welland, Ontario' },
+        { id: '14', name: 'Niagara Falls Hospital', lat: 43.0913, lng: -79.0981, address: '5546 Portage Rd, Niagara Falls, Ontario' },
+        { id: '15', name: 'St. Catharines Hospital', lat: 43.1785, lng: -79.2461, address: '1200 Fourth Ave, St. Catharines, Ontario' },
+        
+        // Postes de police
+        { id: '16', name: 'Police Welland', lat: 42.9922, lng: -79.2477, address: '5 Lincoln St W, Welland, Ontario' },
+        { id: '17', name: 'Police Niagara Falls', lat: 43.0935, lng: -79.0849, address: '4343 Morrison St, Niagara Falls, Ontario' },
+        { id: '18', name: 'Police St. Catharines', lat: 43.1594, lng: -79.2469, address: '68 Church St, St. Catharines, Ontario' },
+        
+        // Routes principales
+        { id: '19', name: 'QEW St. Catharines', lat: 43.1551, lng: -79.2697, address: 'Queen Elizabeth Way, St. Catharines, Ontario' },
+        { id: '20', name: 'Highway 406', lat: 43.0922, lng: -79.2482, address: 'Highway 406, Welland, Ontario' }
       ];
 
       setAddressDatabase(ontarioAddresses);
@@ -176,7 +197,8 @@ const GPSPanel: React.FC = () => {
       const fuseOptions = {
         includeScore: true,
         keys: ['name', 'address'],
-        threshold: 0.4, // Plus la valeur est basse, plus la correspondance doit être précise
+        threshold: 0.6, // Augmenter la tolérance pour plus de résultats
+        distance: 100,
       };
 
       setFuseSearch(new Fuse(ontarioAddresses, fuseOptions));
