@@ -213,52 +213,47 @@ const GPSPanel: React.FC = () => {
   const updateUserLocation = (lat: number, lng: number) => {
     setUserLocation({ lat, lng });
     
-    // Mettre à jour ou créer le marqueur utilisateur
-    if (map) {
-      // Nettoyer les marqueurs existants
+    if (!map) return;
+
+    try {
+      // Si le marqueur existe déjà, mettre à jour sa position
       if (userMarker) {
-        map.removeLayer(userMarker);
-        setUserMarker(null);
+        const layers = userMarker.getLayers();
+        layers.forEach(layer => {
+          if (layer instanceof L.Circle) {
+            layer.setLatLng([lat, lng]);
+          }
+        });
+      } else {
+        // Créer les nouveaux cercles seulement si aucun marqueur n'existe
+        const positionCircle = L.circle([lat, lng], {
+          color: '#ff0000',
+          fillColor: '#f89422',
+          fillOpacity: 0.8,
+          weight: 3,
+          radius: 15,
+          className: 'pulse-circle'
+        });
+        
+        const backgroundCircle = L.circle([lat, lng], {
+          color: '#ffffff',
+          fillColor: '#ffffff',
+          fillOpacity: 0.5,
+          weight: 2,
+          radius: 25,
+        });
+        
+        const markerGroup = L.layerGroup([backgroundCircle, positionCircle]).addTo(map);
+        positionCircle.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        setUserMarker(markerGroup);
       }
       
-      try {
-        console.log("Création d'un nouveau marqueur de position à", lat, lng);
-        
-        // MÉTHODE 1: Cercle avec pulsation
-        const positionCircle = L.circle([lat, lng], {
-          color: '#ff0000',       // Bordure rouge
-          fillColor: '#f89422',   // Remplissage orange
-          fillOpacity: 0.8,       // Très opaque
-          weight: 3,              // Bordure épaisse
-          radius: 15,             // Rayon en mètres (assez grand pour être visible)
-          className: 'pulse-circle' // Classe CSS pour l'animation
-        }).addTo(map);
-        
-        // MÉTHODE 2: Cercle d'arrière-plan pour une meilleure visibilité
-        const backgroundCircle = L.circle([lat, lng], {
-          color: '#ffffff',     // Bordure blanche
-          fillColor: '#ffffff', // Remplissage blanc
-          fillOpacity: 0.5,     // Semi-transparent
-          weight: 2,            // Épaisseur de bordure
-          radius: 25,           // Plus grand que le cercle principal
-        }).addTo(map);
-        
-        // Stocker la référence sous forme de groupe
-        const markerGroup = L.layerGroup([backgroundCircle, positionCircle]);
-        setUserMarker(markerGroup as any);
-        
-        // Forcer le zoom pour être sûr que le marqueur est visible
-        if (autoCenter) {
-          map.setView([lat, lng], 17); // Zoom plus proche (17 au lieu de 15)
-        }
-        
-        // Ajouter un popup qui s'affiche au clic sur le cercle
-        positionCircle.bindPopup(`<b>Votre position actuelle</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        
-        console.log("Marqueur de position créé avec succès");
-      } catch (error) {
-        console.error("Erreur lors de la création du marqueur:", error);
+      // Centrer la carte si autoCenter est activé
+      if (autoCenter) {
+        map.setView([lat, lng], 17, { animate: true });
       }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du marqueur:", error);
     }
   };
 
