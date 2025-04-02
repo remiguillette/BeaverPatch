@@ -220,20 +220,13 @@ const GPSPanel: React.FC = () => {
       // Create marker if it doesn't exist, update if it does
       if (!userMarker) {
         const marker = L.marker([lat, lng], {
-          icon: L.divIcon({
-            className: 'custom-user-marker',
-            html: `
-              <div style="
-                width: 30px;
-                height: 30px;
-                background: #f89422;
-                border: 3px solid #ffffff;
-                border-radius: 50%;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-              "></div>
-            `,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
+          icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
           })
         }).addTo(map);
         
